@@ -4,13 +4,13 @@ import com.companySkyTec.inventory.inventory.dao.ICategoryDao;
 import com.companySkyTec.inventory.inventory.dao.IProductDao;
 import com.companySkyTec.inventory.inventory.model.Category;
 import com.companySkyTec.inventory.inventory.model.Product;
-import com.companySkyTec.inventory.inventory.response.ProductResponse;
 import com.companySkyTec.inventory.inventory.response.ProductResponseRest;
-import com.companySkyTec.inventory.inventory.response.ResponseRest;
+import com.companySkyTec.inventory.inventory.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +25,7 @@ public class ProductServiceImpl implements IProductService{
     private IProductDao productDao;
 
     @Override
+    @Transactional
     public ResponseEntity<ProductResponseRest> save(Product product, Long categoryId) {
 
         ProductResponseRest response = new ProductResponseRest();
@@ -62,5 +63,39 @@ public class ProductServiceImpl implements IProductService{
         return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<ProductResponseRest> findById(Long id) {
 
+        ProductResponseRest response = new ProductResponseRest();
+        List<Product> list = new ArrayList<>();
+
+        try {
+            //Search product by id
+            Optional<Product> product = productDao.findById(id);
+
+            if (product.isPresent()){
+
+                byte [] imageDescompresed = Util.decompressZLib(product.get().getPicture());
+                product.get().setPicture(imageDescompresed);
+                list.add(product.get());
+                response.getProduct().setProducts(list);
+                response.setMetadata("Respuesta ok", "00", "Producto encontrado");
+
+            }else {
+                response.setMetadata("Respuesta nok", "-1", "Producto no encontrado");
+                return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+            }
+
+        }catch (Exception e){
+            e.getStackTrace();
+            response.setMetadata("Respuesta nok", "-1", "Error al guardar producto");
+            return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+
+        return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+
+    }
 }

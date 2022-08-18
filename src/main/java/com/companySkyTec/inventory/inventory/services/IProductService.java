@@ -7,4 +7,6 @@ import org.springframework.http.ResponseEntity;
 public interface IProductService {
 
     public ResponseEntity<ProductResponseRest> save(Product product, Long CategoryId);
+
+    public ResponseEntity<ProductResponseRest> findById(Long id);
 }
