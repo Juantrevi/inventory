@@ -231,7 +231,7 @@ public class ProductServiceImpl implements IProductService{
             if (category.isPresent()){
                 product.setCategory(category.get());
             } else {
-                response.setMetadata("Respuesta nok", "-1", "Categoria no encontrada");
+                response.setMetadata("Respuesta nok", "-1", "P no encontrada");
                 return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
             }
 
@@ -244,7 +244,7 @@ public class ProductServiceImpl implements IProductService{
                 productSearch.get().setName(product.getName());
                 productSearch.get().setAccount(product.getAccount());
                 productSearch.get().setPrice(product.getPrice());
-                productSearch.get().setPicture(Util.compressZLib(product.getPicture()));
+                productSearch.get().setPicture(product.getPicture());
                 productSearch.get().setCategory(category.get());
 
                 //Guardo el producto en la BD
